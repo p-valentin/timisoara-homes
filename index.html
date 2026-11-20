@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Timișoara Apartments</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css">
+<style>
+:root{
+  --bg:#f6f5f2; --panel:#fff; --ink:#1d1d1b; --muted:#6b6a66; --line:#e3e1dc;
+  --accent:#2f6fde; --good:#1f8a4c; --warn:#b7791f; --bad:#c2410c; --chip:#efeee9;
+  --shadow:0 1px 2px rgba(0,0,0,.06),0 4px 14px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){
+  --bg:#141413; --panel:#1e1e1c; --ink:#ecebe7; --muted:#a09e98; --line:#33322f;
+  --accent:#6aa0ff; --good:#4cc283; --warn:#e0a84a; --bad:#f07a4a; --chip:#2a2a27;
+  --shadow:0 1px 2px rgba(0,0,0,.4);
+}}
+:root[data-theme=dark]{
+  --bg:#141413; --panel:#1e1e1c; --ink:#ecebe7; --muted:#a09e98; --line:#33322f;
+  --accent:#6aa0ff; --good:#4cc283; --warn:#e0a84a; --bad:#f07a4a; --chip:#2a2a27;
+  --shadow:0 1px 2px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--accent)}
+header{position:sticky;top:0;z-index:1000;background:var(--panel);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+header h1{font-size:17px;margin:0 8px 0 0;white-space:nowrap}
+header .meta{color:var(--muted);font-size:12px}
+.spacer{flex:1}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:transparent;color:var(--ink);padding:6px 12px;cursor:pointer;font:inherit}
+.seg button.on{background:var(--accent);color:#fff}
+.layout{display:grid;grid-template-columns:270px 1fr;gap:16px;padding:16px;max-width:1700px;margin:0 auto}
+aside{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;align-self:start;position:sticky;top:64px;max-height:calc(100vh - 80px);overflow:auto}
+aside h3{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:14px 0 6px}
+aside h3:first-child{margin-top:0}
+input[type=text],input[type=number],select{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+label.ck{display:flex;gap:7px;align-items:center;padding:2px 0;cursor:pointer}
+.zones{display:flex;flex-wrap:wrap;gap:5px}
+.zchip{border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:3px 9px;font-size:12px;cursor:pointer}
+.zchip.off{opacity:.45;text-decoration:line-through;background:transparent}
+.zchip small{color:var(--muted)}
+.btnrow{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.btn{border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:8px;padding:5px 10px;cursor:pointer;font:inherit;font-size:12px}
+main{min-width:0}
+.bar{display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.bar .count{font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column;cursor:pointer;position:relative}
+.card.fav{outline:2px solid var(--warn)}
+.ph{aspect-ratio:4/3;background:var(--chip) center/cover no-repeat;position:relative}
+.badges{position:absolute;left:8px;top:8px;display:flex;gap:4px;flex-wrap:wrap}
+.b{font-size:11px;font-weight:600;padding:2px 7px;border-radius:6px;background:rgba(0,0,0,.65);color:#fff}
+.b.new{background:var(--good)}.b.drop{background:var(--accent)}.b.unk{background:var(--warn)}.b.priv{background:#7c3aed}
+.acts{position:absolute;right:6px;top:6px;display:flex;gap:4px}
+.acts button{border:0;border-radius:8px;width:30px;height:30px;background:rgba(0,0,0,.55);color:#fff;cursor:pointer;font-size:15px}
+.acts button.on{background:var(--warn)}
+.body{padding:10px 12px 12px;display:flex;flex-direction:column;gap:4px}
+.price{font-size:19px;font-weight:700}
+.price small{font-size:12px;color:var(--muted);font-weight:500;margin-left:6px}
+.facts{color:var(--ink)}
+.where{color:var(--muted);font-size:13px}
+.ttl{font-size:12.5px;color:var(--muted);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.srcs{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px}
+.src{font-size:11px;padding:1px 7px;border-radius:999px;border:1px solid var(--line);text-decoration:none;color:var(--ink)}
+.src.storia{border-color:#2fb5a3}.src.olx{border-color:#7c3aed}.src.publi24{border-color:#e4572e}
+.src.primum{border-color:#0ea5e9}.src.apostu{border-color:#d97706}
+.src.imobiliare{border-color:#e11d48}.src.lajumate{border-color:#65a30d}.src.imoradar{border-color:#64748b}.src.homezz{border-color:#a855f7}
+#map{height:calc(100vh - 140px);border-radius:12px;border:1px solid var(--line)}
+table{width:100%;border-collapse:collapse;background:var(--panel);border-radius:12px;overflow:hidden}
+th,td{padding:7px 9px;border-bottom:1px solid var(--line);text-align:left;font-size:13px;white-space:nowrap}
+th{cursor:pointer;color:var(--muted);font-weight:600;position:sticky;top:0;background:var(--panel)}
+td.t{white-space:normal;min-width:220px}
+tr:hover td{background:var(--chip)}
+.more{display:block;margin:16px auto;padding:9px 18px}
+dialog{border:0;border-radius:14px;padding:0;max-width:920px;width:calc(100% - 32px);background:var(--panel);color:var(--ink)}
+dialog::backdrop{background:rgba(0,0,0,.55)}
+.dlg{padding:16px 18px 20px}
+.gal{display:flex;gap:6px;overflow-x:auto;scroll-snap-type:x mandatory}
+.gal img{height:300px;border-radius:8px;scroll-snap-align:start;flex:none;max-width:90%;object-fit:cover}
+.desc{white-space:pre-wrap;font-size:13px;color:var(--ink);max-height:260px;overflow:auto;border-top:1px solid var(--line);padding-top:10px;margin-top:10px}
+.note{width:100%;min-height:54px;margin-top:10px;padding:8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit}
+.x{float:right;border:0;background:transparent;color:var(--muted);font-size:22px;cursor:pointer}
+.hint{font-size:12px;color:var(--muted)}
+.gal img{cursor:zoom-in}
+.b.cam{background:rgba(0,0,0,.65);position:absolute;right:8px;bottom:8px}
+#lb{position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center}
+#lb.on{display:flex}
+#lb img{max-width:96vw;max-height:88vh;object-fit:contain;border-radius:6px}
+#lb button{position:absolute;border:0;background:rgba(255,255,255,.12);color:#fff;font-size:28px;width:48px;height:48px;border-radius:50%;cursor:pointer}
+#lb .p{left:16px;top:50%}#lb .n{right:16px;top:50%}#lb .c{right:16px;top:16px}
+#lb .i{position:absolute;bottom:14px;left:0;right:0;text-align:center;color:#ddd;font-size:13px}
+.filters-toggle{display:none}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:13px;z-index:6000;opacity:0;transition:opacity .2s;pointer-events:none}
+#toast.on{opacity:1}
+.flag{border:1px solid var(--line);border-radius:8px;padding:7px 8px;margin-bottom:6px;font-size:12px}
+.flag label{font-weight:600;font-size:13px}
+.flag p{margin:3px 0 2px;color:var(--muted)}
+.flag a{font-size:11px;margin-right:6px}
+.b.flg{background:var(--bad)}
+.b.excl{background:#0e7490}
+.b.deal{background:#15803d}.b.odd{background:#78716c}.b.rep{background:#9333ea}
+.feat{display:inline-block;font-size:11px;padding:1px 7px;border-radius:999px;background:var(--chip);margin:2px 3px 0 0}
+.feats{display:grid;grid-template-columns:1fr 1fr;gap:0 6px}
+.noph{display:flex;align-items:center;justify-content:center;text-align:center;color:var(--muted);font-size:13px;padding:0 20px}
+@media (max-width:860px){
+  .layout{grid-template-columns:1fr;padding:12px 16px}
+  aside{position:static;max-height:none;display:none}
+  aside.open{display:block}
+  .filters-toggle{display:inline-block}
+  header .meta{width:100%}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>🏠 Timișoara apartments</h1>
+  <span class="meta" id="meta"></span>
+  <span class="spacer"></span>
+  <button class="btn filters-toggle" id="ftog">Filters</button>
+  <div class="seg" id="views">
+    <button data-v="grid" class="on">Cards</button><button data-v="table">Table</button><button data-v="map">Map</button>
+  </div>
+  <button class="btn" id="share" title="Copy a link to these exact filters">🔗 Share</button>
+  <button class="btn" id="theme" title="Theme">◐</button>
+</header>
+<div class="layout">
+<aside id="side">
+  <h3>Search</h3>
+  <input type="text" id="q" placeholder="street, word, agency…">
+  <h3>Type</h3>
+  <select id="kind"><option value="">Apartments + houses</option><option value="apartment">Apartments</option><option value="house">Houses</option></select>
+  <h3>Price (€)</h3>
+  <div class="row2"><input type="number" id="pmin" placeholder="min" step="5000"><input type="number" id="pmax" placeholder="max" step="5000"></div>
+  <h3>Rooms · area (m²)</h3>
+  <div class="row2">
+    <select id="rooms"><option value="3">3+ rooms</option><option value="4">4+ rooms</option><option value="5">5+ rooms</option></select>
+    <input type="number" id="amin" placeholder="min m²" step="5">
+  </div>
+  <h3>Max €/m²</h3>
+  <input type="number" id="ppsm" placeholder="e.g. 2000" step="100">
+  <h3>Floor</h3>
+  <label class="ck"><input type="checkbox" id="unk" checked> Include floor not confirmed <span class="hint">(could be top)</span></label>
+  <h3>Built</h3>
+  <select id="age"><option value="">Any year</option><option value="new">New (2015+)</option><option value="mid">2000+</option><option value="old">Before 1990 (blocks)</option></select>
+  <h3>Must have</h3>
+  <div class="feats" id="feats"></div>
+  <h3>Deals</h3>
+  <label class="ck"><input type="checkbox" id="dealonly"> Only good deals <span class="hint">(≥12% under area price)</span></label>
+  <label class="ck"><input type="checkbox" id="droponly"> Only price drops</label>
+  <h3>Seller</h3>
+  <select id="seller"><option value="">Anyone</option><option value="private">Private owner</option><option value="agency">Agency / developer</option></select>
+  <h3>Show</h3>
+  <label class="ck"><input type="checkbox" id="favonly"> Only ★ favourites</label>
+  <label class="ck"><input type="checkbox" id="newonly"> Only new (last 3 days)</label>
+  <label class="ck"><input type="checkbox" id="exclonly"> Only flats not on the big portals</label>
+  <label class="ck"><input type="checkbox" id="showhidden"> Show hidden listings</label>
+  <label class="ck"><input type="checkbox" id="dedupe" checked> Merge duplicates across sites</label>
+  <h3>Sources</h3>
+  <div id="srcs"></div>
+  <h3>Flagged areas</h3>
+  <div id="flagged"></div>
+  <h3>Neighbourhoods <span class="hint">· click to hide</span></h3>
+  <div class="btnrow"><button class="btn" id="zall">Show all</button><button class="btn" id="znone">Hide all</button></div>
+  <div class="zones" id="zones" style="margin-top:8px"></div>
+  <p class="hint">Hidden neighbourhoods, ★ and notes are saved in this browser.</p>
+</aside>
+<main>
+  <div class="bar">
+    <span class="count" id="count"></span>
+    <span class="spacer"></span>
+    <label class="hint">Sort</label>
+    <select id="sort" style="width:auto">
+      <option value="new">Newest first</option><option value="price">Price ↑</option><option value="pricedesc">Price ↓</option>
+      <option value="ppsm">€/m² ↑</option><option value="area">Area ↓</option>
+      <option value="deal">Best deal</option><option value="drop">Biggest price drop</option><option value="market">Longest on market</option>
+    </select>
+  </div>
+  <div id="grid" class="grid"></div>
+  <button class="btn more" id="more">Show more</button>
+  <div id="tablewrap" hidden><table><thead><tr>
+    <th data-s="price">Price</th><th data-s="ppsm">€/m²</th><th>Rooms</th><th data-s="area">m²</th><th>Floor</th><th>Zone</th><th>Year</th><th class="t">Title</th><th>Sources</th>
+  </tr></thead><tbody id="tbody"></tbody></table></div>
+  <div id="mapwrap" hidden><div id="map"></div><p class="hint">Dot colour = €/m² (green cheaper → red pricier). Draw a shape (tools top-left) to hide everything inside it; the bin icon removes shapes. Listings without an exact pin (OLX, Imobiliare) are judged by the centre of their neighbourhood.</p></div>
+</main>
+</div>
+<div id="toast"></div>
+<dialog id="dlg"><div class="dlg" id="dlgbody"></div>
+<div id="lb"><img alt=""><button class="p" aria-label="Previous">‹</button><button class="n" aria-label="Next">›</button><button class="c" aria-label="Close">×</button><div class="i"></div></div>
+</dialog>
+
+<script src="data.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem('apt.'+k); return v===null ? d : JSON.parse(v); }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem('apt.'+k, JSON.stringify(v)); }catch(e){} }
+};
+const DATA = window.APT_DATA || [], META = window.APT_META || {};
+let favs = new Set(store.get('favs', [])), hidden = new Set(store.get('hidden', []));
+let hiddenZones = new Set(store.get('hiddenZones', [])), notes = store.get('notes', {});
+let srcOff = new Set(store.get('srcOff', []));
+let view = store.get('view','grid'), shown = 60, map, layer;
+const NOW = Date.now(), DAY = 864e5;
+const fmt = n => n==null ? '–' : n.toLocaleString('ro-RO');
+const ZONE_UNK = 'Unknown zone';
+const FEAT = {own_boiler:'Own gas boiler', lift:'Lift', parking:'Parking (included)', parking_extra:'Parking (extra cost)', storage:'Storage room', renovated:'Renovated',
+  furnished:'Furnished', new_build:'New build', two_baths:'2 bathrooms', balcony:'Balcony / terrace', ac:'Air conditioning', garden:'Garden'};
+let mustHave = new Set(store.get('mustHave', []));
+let drawn = store.get('drawnAreas', []);  // [[lat,lng],...] polygons to exclude
+const DEAL_MIN = 12, DEAL_ODD = 40;
+const PORTALS = new Set(['storia', 'olx', 'publi24', 'imobiliare', 'lajumate', 'imoradar', 'homezz']);
+const AGENCY_NAME = {primum: 'Primum', apostu: 'Apostu Estate'};
+
+// group duplicates (same rooms/area/price/floor across sites)
+const groups = {};
+for (const r of DATA){ (groups[r.group || r.id] ||= []).push(r); }
+// neighbourhood centres from exact pins (used by drawn map areas for listings without an exact pin)
+const ZONE_CENTRE = {};
+{ const acc = {};
+  for (const r of DATA) if (r.zone && r.lat && !r.coords_approx){ const a = acc[r.zone] ||= [0,0,0]; a[0]+=r.lat; a[1]+=r.lon; a[2]++; }
+  for (const [z,a] of Object.entries(acc)) if (a[2] >= 3) ZONE_CENTRE[z] = [a[0]/a[2], a[1]/a[2]]; }
+// a flat no big portal has: only on an agency's own website
+const exclusive = r => (groups[r.group || r.id] || [r]).every(x => !PORTALS.has(x.source));
+
+function inPoly(lat, lng, poly){
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++){
+    const [yi, xi] = poly[i], [yj, xj] = poly[j];
+    if (((yi > lat) !== (yj > lat)) && (lng < (xj - xi) * (lat - yi) / (yj - yi) + xi)) inside = !inside;
+  }
+  return inside;
+}
+function marketTxt(d){ return d == null ? '' : d < 1 ? 'listed today' : d < 60 ? `on market ${d} days` : `on market ${Math.round(d/30)} months`; }
+function renderFeats(){
+  $('#feats').innerHTML = Object.entries(FEAT).map(([k,l]) => `<label class="ck"><input type="checkbox" data-feat="${k}" ${mustHave.has(k)?'checked':''}> ${l}</label>`).join('');
+}
+function floorTxt(r){
+  if (r.kind === 'house') return `🏡 house${r.land ? ' · land ' + Math.round(r.land) + ' m²' : ''}`;
+  if (r.floor_final == null) return r.floor_status === 'ok' ? 'mid floor' : 'floor ?';
+  return `floor ${r.floor_final}${r.floors_total_final ? '/' + r.floors_total_final : ''}`;
+}
+function isNew(r){ return r.first_seen && NOW - Date.parse(r.first_seen) < 3*DAY && Date.parse(META.built) - Date.parse(r.first_seen) < 3*DAY && !firstRun(r); }
+function firstRun(r){ return META.first_run && r.first_seen && r.first_seen.slice(0,10) === META.first_run; }
+function listedAge(r){
+  const t = Date.parse(r.created || r.first_seen); if (!t) return '';
+  const d = Math.floor((NOW - t)/DAY);
+  return d <= 0 ? 'today' : d === 1 ? '1 day ago' : d < 60 ? d + ' days ago' : Math.floor(d/30) + ' months ago';
+}
+function dropped(r){ return r.price_history && r.price_history.length && r.price_history[r.price_history.length-1][1] > r.price; }
+
+function filters(){
+  return {
+    q: $('#q').value.trim().toLowerCase(), pmin: +$('#pmin').value || 0, pmax: +$('#pmax').value || Infinity,
+    rooms: +$('#rooms').value, amin: +$('#amin').value || 0, ppsm: +$('#ppsm').value || Infinity,
+    unk: $('#unk').checked, kind: $('#kind').value, age: $('#age').value, seller: $('#seller').value, favonly: $('#favonly').checked,
+    newonly: $('#newonly').checked, dealonly: $('#dealonly').checked, droponly: $('#droponly').checked, exclonly: $('#exclonly').checked, showhidden: $('#showhidden').checked, dedupe: $('#dedupe').checked
+  };
+}
+function pass(r, f, ignoreZone){
+  if (srcOff.has(r.source)) return false;
+  if (!f.showhidden && hidden.has(r.id)) return false;
+  if (f.favonly && !favs.has(r.id)) return false;
+  if (r.price < f.pmin || r.price > f.pmax) return false;
+  if ((r.rooms||0) < f.rooms) return false;
+  if ((r.area||0) < f.amin) return false;
+  if (r.ppsm && r.ppsm > f.ppsm) return false;
+  if (!f.unk && r.floor_status === 'unknown') return false;
+  if (f.kind && (r.kind || 'apartment') !== f.kind) return false;
+  if (f.seller && r.seller !== f.seller) return false;
+  if (f.newonly && !isNew(r)) return false;
+  if (f.exclonly && !exclusive(r)) return false;
+  if (f.dealonly && !((r.deal||0) >= DEAL_MIN && r.deal < DEAL_ODD)) return false;
+  if (f.droponly && !r.group_drop) return false;
+  for (const k of mustHave) if (!(r.features||[]).includes(k)) return false;
+  if (drawn.length){
+    // exact pin if we have one, otherwise the centre of the listing's neighbourhood
+    const pt = (r.lat && !r.coords_approx) ? [r.lat, r.lon] : ZONE_CENTRE[r.zone];
+    if (pt && drawn.some(poly => inPoly(pt[0], pt[1], poly))) return false;
+  }
+  if (f.age){
+    const y = r.year || (r.year_band && +(r.year_band.match(/\d{4}/g)||[]).pop()) || null;
+    if (!y) return false;
+    if (f.age==='new' && y < 2015) return false;
+    if (f.age==='mid' && y < 2000) return false;
+    if (f.age==='old' && y >= 1990) return false;
+  }
+  if (!ignoreZone && hiddenZones.has(r.zone || ZONE_UNK)) return false;
+  if (f.q){
+    const hay = [r.title, r.zone, r.street, r.seller_name, r.desc].join(' ').toLowerCase();
+    if (!hay.includes(f.q)) return false;
+  }
+  return true;
+}
+function sorted(rows){
+  const s = $('#sort').value;
+  const k = { new: r => -(Date.parse(r.created || r.first_seen) || 0), price: r => r.price, pricedesc: r => -r.price,
+              ppsm: r => r.ppsm || 1e9, area: r => -(r.area||0),
+              deal: r => -(r.deal ?? -999), drop: r => -(r.group_drop||0), market: r => -(r.on_market_days||0) }[s];
+  return rows.sort((a,b) => k(a) - k(b));
+}
+function compute(){
+  const f = filters();
+  let rows = DATA.filter(r => pass(r, f));
+  if (f.dedupe){
+    const seen = new Set(), out = [];
+    for (const r of rows){ const g = r.group || r.id; if (!seen.has(g)){ seen.add(g); out.push(r); } }
+    rows = out;
+  }
+  return sorted(rows);
+}
+function srcLinks(r){
+  // card: one chip per site (with count); click opens the cheapest copy on that site
+  const g = groups[r.group || r.id] || [r], by = {};
+  for (const x of g) (by[x.source] ||= []).push(x);
+  return Object.entries(by).map(([src, xs]) => { xs.sort((a,b) => a.price - b.price);
+    return `<a class="src ${src}" href="${xs[0].url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${src}${xs.length>1?' ×'+xs.length:''}</a>`; }).join('');
+}
+function priceTxt(r){
+  const g = groups[r.group || r.id] || [r];
+  const lo = Math.min(...g.map(x => x.price)), hi = Math.max(...g.map(x => x.price));
+  return lo === hi ? `${fmt(r.price)} €` : `<span class="hint" style="font-weight:500">from</span> ${fmt(lo)} €`;
+}
+function copiesTable(r){
+  const g = (groups[r.group || r.id] || [r]).slice().sort((a,b) => a.price - b.price);
+  if (g.length < 2) return '';
+  const cheapest = g[0].price;
+  return `<h3 style="margin:12px 0 4px;font-size:14px">Posted ${g.length} times</h3><table><tbody>${g.map(x => `<tr>
+    <td><a class="src ${x.source}" href="${x.url}" target="_blank" rel="noopener">${x.source}</a></td>
+    <td><b>${fmt(x.price)} €</b>${x.price>cheapest?` <span class="hint">+${fmt(x.price-cheapest)}</span>`:''}</td>
+    <td>${floorTxt(x)}</td>
+    <td>${esc(x.seller==='private'?'private owner':(x.seller_name||''))}</td>
+    <td class="t">${esc(x.title)}</td></tr>`).join('')}</tbody></table>
+    <p class="hint">Grouped by matching description, photo, or price + area + floor in the same area.</p>`;
+}
+function card(r){
+  const badges = [];
+  if (isNew(r)) badges.push('<span class="b new">NEW</span>');
+  if (r.group_drop) badges.push(`<span class="b drop" title="Highest price seen for this flat minus today's lowest">↓ ${fmt(r.group_drop)} €</span>`);
+  if (r.deal >= DEAL_ODD) badges.push(`<span class="b odd" title="${esc(r.deal_basis||'')}: unusually cheap, check for errors or needed renovation">❓ ${r.deal}% under, check</span>`);
+  else if (r.deal >= DEAL_MIN) badges.push(`<span class="b deal" title="${esc(r.deal_basis||'')}">💰 ${r.deal}% under area price</span>`);
+  if (r.reposted) badges.push('<span class="b rep" title="Same site, fresh ad for a flat already listed earlier">🔁 reposted</span>');
+  if (r.floor_status === 'unknown') badges.push('<span class="b unk">floor ?</span>');
+  if (r.seller === 'private') badges.push('<span class="b priv">owner</span>');
+  if (exclusive(r)) badges.push(`<span class="b excl" title="Not on Storia, OLX or Publi24">🔎 only on ${esc(AGENCY_NAME[r.source] || r.source)}</span>`);
+  if (FLAG[r.zone]) badges.push(`<span class="b flg" title="${esc(FLAG[r.zone].reason)}">⚠ ${esc(r.zone)}</span>`);
+  const yr = r.year || r.year_band || '';
+  return `<div class="card ${favs.has(r.id)?'fav':''}" data-id="${r.id}">
+    <div class="ph${r.image?'':' noph'}" style="${r.image?`background-image:url('${r.image.replace(/'/g,'%27')}')`:''}">${r.image?'':'📷 No photos here: open the ad'}
+      <div class="badges">${badges.join('')}</div>${r.n_img>1?`<span class="b cam">📷 ${r.n_img}</span>`:''}
+      <div class="acts"><button data-a="fav" class="${favs.has(r.id)?'on':''}" title="Favourite">★</button><button data-a="hide" title="${hidden.has(r.id)?'Unhide':'Hide'}">${hidden.has(r.id)?'↺':'✕'}</button></div>
+    </div>
+    <div class="body">
+      <div class="price">${priceTxt(r)}<small>${r.ppsm?fmt(r.ppsm)+' €/m²':''}</small></div>
+      <div class="facts">${r.rooms||'?'} rooms · ${r.area?Math.round(r.area)+' m²':'? m²'} · ${floorTxt(r)}${yr?' · '+yr:''}</div>
+      <div class="where">📍 ${r.zone || '–'}${r.street?', '+r.street:''} · ${marketTxt(r.on_market_days) || listedAge(r)}</div>
+      <div class="ttl">${esc(r.title)}</div>
+      <div class="srcs">${srcLinks(r)}${notes[r.id]?'<span class="src">📝 note</span>':''}</div>
+    </div></div>`;
+}
+const esc = s => (s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function renderZones(){
+  const f = filters(), cnt = {};
+  for (const r of DATA){ if (pass(r, f, true)){ const z = r.zone || ZONE_UNK; cnt[z] = (cnt[z]||0) + 1; } }
+  const all = [...new Set(DATA.map(r => r.zone || ZONE_UNK))].sort((a,b) => (cnt[b]||0)-(cnt[a]||0) || a.localeCompare(b));
+  $('#zones').innerHTML = all.map(z => `<button class="zchip ${hiddenZones.has(z)?'off':''}" data-z="${esc(z)}">${esc(z)} <small>${cnt[z]||0}</small></button>`).join('');
+}
+function renderSources(){
+  const s = [...new Set(DATA.map(r => r.source))];
+  $('#srcs').innerHTML = s.map(x => `<label class="ck"><input type="checkbox" data-src="${x}" ${srcOff.has(x)?'':'checked'}> ${x} <span class="hint">${DATA.filter(r=>r.source===x).length}</span></label>`).join('');
+}
+function render(){
+  const rows = compute();
+  $('#count').textContent = `${rows.length} homes`;
+  renderZones();
+  $('#grid').hidden = view !== 'grid'; $('#more').hidden = view !== 'grid' || rows.length <= shown;
+  $('#tablewrap').hidden = view !== 'table'; $('#mapwrap').hidden = view !== 'map';
+  if (view === 'grid') $('#grid').innerHTML = rows.slice(0, shown).map(card).join('');
+  if (view === 'table') $('#tbody').innerHTML = rows.slice(0, 1500).map(r => `<tr data-id="${r.id}">
+    <td><b>${fmt(r.price)}</b></td><td>${fmt(r.ppsm)}</td><td>${r.rooms||'?'}</td><td>${r.area?Math.round(r.area):'?'}</td>
+    <td>${floorTxt(r).replace('floor ','')}</td><td>${esc(r.zone||'–')}</td><td>${r.year||r.year_band||''}</td>
+    <td class="t">${favs.has(r.id)?'★ ':''}${esc(r.title)}</td><td>${srcLinks(r)}</td></tr>`).join('');
+  if (view === 'map') drawMap(rows);
+  document.querySelectorAll('#views button').forEach(b => b.classList.toggle('on', b.dataset.v === view));
+}
+function colour(ppsm){
+  if (!ppsm) return '#888';
+  const t = Math.max(0, Math.min(1, (ppsm - 1200) / 1300));
+  return `hsl(${Math.round(130 - 130*t)} 65% 45%)`;
+}
+function drawMap(rows){
+  if (!window.L){ $('#map').textContent = 'Map library failed to load (offline?).'; return; }
+  if (!map){
+    map = L.map('map', {preferCanvas:true}).setView([45.755, 21.226], 13);
+    const dark = document.documentElement.dataset.theme === 'dark' || (!document.documentElement.dataset.theme && matchMedia('(prefers-color-scheme: dark)').matches);
+    // Esri tiles: no API key and they work from file:// too (OSM's own tiles refuse requests without a Referer)
+    const E = 'https://server.arcgisonline.com/ArcGIS/rest/services/';
+    const attr = 'Tiles © Esri, OpenStreetMap contributors';
+    if (dark){
+      L.tileLayer(E + 'Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {maxNativeZoom:16, maxZoom:19, attribution:attr}).addTo(map);
+      L.tileLayer(E + 'Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {maxNativeZoom:16, maxZoom:19}).addTo(map);
+    } else {
+      L.tileLayer(E + 'World_Street_Map/MapServer/tile/{z}/{y}/{x}', {maxZoom:19, attribution:attr}).addTo(map);
+    }
+  }
+  setTimeout(() => map.invalidateSize(), 50);
+  if (!map._drawReady && L.Control && L.Control.Draw){
+    map._drawReady = true;
+    const drawnLayer = new L.FeatureGroup().addTo(map);
+    const paint = () => { drawnLayer.clearLayers(); drawn.forEach(p => L.polygon(p, {color:'#c2410c', weight:2, fillOpacity:.12}).addTo(drawnLayer)); };
+    paint();
+    map.addControl(new L.Control.Draw({
+      draw: {polygon: {shapeOptions: {color:'#c2410c'}}, rectangle: {showArea:false, shapeOptions: {color:'#c2410c'}},
+             polyline:false, circle:false, marker:false, circlemarker:false},
+      edit: {featureGroup: drawnLayer, edit:false, remove:true}
+    }));
+    map.on(L.Draw.Event.CREATED, e => { drawn.push(e.layer.getLatLngs()[0].map(p => [p.lat, p.lng])); store.set('drawnAreas', drawn); paint(); render(); });
+    map.on(L.Draw.Event.DELETED, () => { drawn = drawnLayer.getLayers().map(l => l.getLatLngs()[0].map(p => [p.lat, p.lng])); store.set('drawnAreas', drawn); render(); });
+  }
+  if (layer) layer.remove();
+  layer = L.layerGroup().addTo(map);
+  for (const r of rows){
+    if (!r.lat) continue;
+    L.circleMarker([r.lat, r.lon], {radius: favs.has(r.id)?9:6, color: favs.has(r.id)?'#b7791f':'#fff', weight: favs.has(r.id)?3:1,
+      fillColor: colour(r.ppsm), fillOpacity: r.coords_approx ? .55 : .9})
+      .bindTooltip(`${fmt(r.price)} € · ${r.rooms} rooms · ${Math.round(r.area||0)} m² · ${esc(r.zone||'')}`)
+      .on('click', () => openDlg(r.id)).addTo(layer);
+  }
+}
+let galleryState = 'none';
+function loadGallery(cb){
+  if (galleryState === 'ready') return cb();
+  if (galleryState === 'loading'){ setTimeout(() => loadGallery(cb), 100); return; }
+  galleryState = 'loading';
+  const sc = document.createElement('script'); sc.src = 'images.js';
+  sc.onload = () => { galleryState = 'ready'; cb(); };
+  sc.onerror = () => { galleryState = 'failed'; cb(); };
+  document.head.appendChild(sc);
+}
+function imagesOf(r){
+  const g = (window.APT_IMG || {})[r.id], P = window.APT_IMG_PREFIX || [];
+  const list = g ? g.map(u => u[0] === '~' ? P[+u[1]] + u.slice(2) : u) : [r.image];
+  return list.filter(Boolean);
+}
+let lbList = [], lbIdx = 0;
+const lb = $('#lb');
+function lbShow(i){ lbIdx = (i + lbList.length) % lbList.length; lb.querySelector('img').src = lbList[lbIdx]; lb.querySelector('.i').textContent = `${lbIdx+1} / ${lbList.length}`; }
+lb.addEventListener('click', e => {
+  if (e.target.classList.contains('p')) lbShow(lbIdx-1);
+  else if (e.target.classList.contains('n')) lbShow(lbIdx+1);
+  else if (e.target.tagName !== 'IMG') lb.classList.remove('on');
+});
+document.addEventListener('keydown', e => {
+  if (!lb.classList.contains('on')) return;
+  if (e.key === 'ArrowLeft') lbShow(lbIdx-1);
+  if (e.key === 'ArrowRight') lbShow(lbIdx+1);
+  if (e.key === 'Escape'){ e.preventDefault(); lb.classList.remove('on'); }
+});
+// Esc closes the enlarged photo first, then the listing
+$('#dlg').addEventListener('cancel', e => { if (lb.classList.contains('on')){ e.preventDefault(); lb.classList.remove('on'); } });
+function openDlg(id){ loadGallery(() => openDlg2(id)); }
+function openDlg2(id){
+  const r = DATA.find(x => x.id === id); if (!r) return;
+  const imgs = imagesOf(r);
+  const hist = (r.price_history||[]).map(([d,p]) => `${d}: ${fmt(p)} €`).join(' → ');
+  $('#dlgbody').innerHTML = `<button class="x" onclick="dlg.close()">×</button>
+    <div class="price">${fmt(r.price)} €<small>${r.ppsm?fmt(r.ppsm)+' €/m²':''}</small></div>
+    <div class="facts" style="margin:4px 0 2px">${r.rooms||'?'} rooms · ${r.area?Math.round(r.area)+' m²':''} · ${floorTxt(r)} · ${r.year||r.year_band||'year ?'}${r.partition?' · '+esc(r.partition):''}${r.heating?' · heating: '+esc(r.heating):''}</div>
+    <div class="where">📍 ${esc(r.zone||'–')}${r.street?', '+esc(r.street):''} · listed ${listedAge(r)} · ${r.seller==='private'?'private owner':esc(r.seller_name||r.seller||'')}</div>
+    <h3 style="margin:10px 0">${esc(r.title)}</h3>
+    <div class="hint" style="margin-bottom:4px">📷 ${imgs.length} photo${imgs.length===1?'':'s'} · click one to enlarge</div>
+    <div class="gal">${imgs.map((i,n) => `<img src="${i}" loading="lazy" alt="" data-lb="${n}">`).join('')}</div>
+    <div class="srcs" style="margin-top:10px">${srcLinks(r)}</div>
+    ${(r.features||[]).length ? `<div style="margin-top:8px">${r.features.map(k => `<span class="feat">${FEAT[k]||k}</span>`).join('')}</div>` : ''}
+    <p class="hint" style="margin:8px 0 0">${[marketTxt(r.on_market_days), r.deal!=null ? `${r.deal>0?r.deal+'% under':(-r.deal)+'% over'} the ${esc(r.deal_basis||'')}` : '', r.group_drop ? `price dropped ${fmt(r.group_drop)} € since first seen` : '', r.reposted ? 'reposted as a new ad' : ''].filter(Boolean).join(' · ')}</p>
+    ${copiesTable(r)}
+    ${hist?`<p class="hint">Price history: ${hist} → now ${fmt(r.price)} €</p>`:''}
+    <div class="desc">${esc(r.desc||'No description saved.')}</div>
+    <textarea class="note" placeholder="Your notes (saved in this browser)…" data-note="${r.id}">${esc(notes[r.id]||'')}</textarea>
+    <div class="btnrow"><button class="btn" data-dfav="${r.id}">${favs.has(r.id)?'★ Unfavourite':'☆ Favourite'}</button><button class="btn" data-dhide="${r.id}">${hidden.has(r.id)?'Unhide':'Hide'}</button><button class="btn" data-dshare="1">🔗 Share this home</button></div>`;
+  dlg.showModal();
+}
+const dlg = $('#dlg');
+dlg.addEventListener('click', e => {
+  if (e.target === dlg) dlg.close();
+  if (e.target.dataset.lb !== undefined){ lbList = [...dlg.querySelectorAll('.gal img')].map(i => i.src); lb.classList.add('on'); lbShow(+e.target.dataset.lb); return; }
+  if (e.target.dataset.dshare){ shareLink(); return; }
+  const f = e.target.dataset.dfav, h = e.target.dataset.dhide;
+  if (f){ toggle(favs, f, 'favs'); openDlg2(f); render(); }
+  if (h){ toggle(hidden, h, 'hidden'); dlg.close(); render(); }
+});
+dlg.addEventListener('input', e => {
+  const id = e.target.dataset.note; if (!id) return;
+  if (e.target.value.trim()) notes[id] = e.target.value; else delete notes[id];
+  store.set('notes', notes);
+});
+function toggle(set, id, key){ set.has(id) ? set.delete(id) : set.add(id); store.set(key, [...set]); }
+
+// events
+document.addEventListener('click', e => {
+  const z = e.target.closest('.zchip');
+  if (z){ toggle(hiddenZones, z.dataset.z, 'hiddenZones'); shown = 60; render(); return; }
+  const btn = e.target.closest('.acts button');
+  const c = e.target.closest('.card, tbody tr');
+  if (btn && c){ e.stopPropagation(); toggle(btn.dataset.a === 'fav' ? favs : hidden, c.dataset.id, btn.dataset.a === 'fav' ? 'favs' : 'hidden'); render(); return; }
+  if (c && !e.target.closest('a')) openDlg(c.dataset.id);
+});
+$('#srcs').addEventListener('change', e => { const s = e.target.dataset.src; if (s){ e.target.checked ? srcOff.delete(s) : srcOff.add(s); store.set('srcOff', [...srcOff]); render(); } });
+$('#feats').addEventListener('change', e => { const k = e.target.dataset.feat; if (!k) return;
+  e.target.checked ? mustHave.add(k) : mustHave.delete(k); store.set('mustHave', [...mustHave]); shown = 60; render(); });
+$('#zall').onclick = () => { hiddenZones.clear(); store.set('hiddenZones', []); render(); };
+$('#znone').onclick = () => { DATA.forEach(r => hiddenZones.add(r.zone || ZONE_UNK)); store.set('hiddenZones', [...hiddenZones]); render(); };
+$('#more').onclick = () => { shown += 60; render(); };
+document.querySelectorAll('#views button').forEach(b => b.onclick = () => { view = b.dataset.v; store.set('view', view); render(); });
+document.querySelectorAll('th[data-s]').forEach(th => th.onclick = () => { const m = {price:'price', ppsm:'ppsm', area:'area'}[th.dataset.s]; $('#sort').value = m; render(); });
+$('#ftog').onclick = () => $('#side').classList.toggle('open');
+$('#theme').onclick = () => { const cur = document.documentElement.dataset.theme; const nx = cur === 'dark' ? 'light' : cur === 'light' ? '' : (matchMedia('(prefers-color-scheme: dark)').matches ? 'light' : 'dark'); if (nx) document.documentElement.dataset.theme = nx; else delete document.documentElement.dataset.theme; store.set('theme', nx); };
+const FIELDS = ['dealonly','droponly','kind','q','pmin','pmax','rooms','amin','ppsm','unk','age','seller','favonly','newonly','exclonly','showhidden','dedupe','sort'];
+const saved = store.get('filters', {});
+for (const k of FIELDS){ const el = $('#'+k); if (saved[k] !== undefined) el.type === 'checkbox' ? el.checked = saved[k] : el.value = saved[k];
+  el.addEventListener(el.tagName === 'INPUT' && el.type !== 'checkbox' ? 'input' : 'change', () => {
+    const o = {}; for (const f of FIELDS){ const x = $('#'+f); o[f] = x.type === 'checkbox' ? x.checked : x.value; } store.set('filters', o); shown = 60; render(); }); }
+const th = store.get('theme', ''); if (th) document.documentElement.dataset.theme = th;
+const srcCount = Object.entries(META.sources||{}).map(([k,v]) => `${k} ${v}`).join(' · ');
+$('#meta').textContent = META.built ? `updated ${new Date(META.built).toLocaleString('ro-RO')} · ${srcCount}` : 'no data yet: run scrape.py';
+const FLAG = META.flagged || {};
+// apply each zone's default once; if the default later changes to "hide", apply it again.
+// After that the checkbox is yours: unhiding sticks.
+{ const applied = store.get('flagApplied', {});
+  for (const [z, f] of Object.entries(FLAG)){
+    if (f.hide && applied[z] !== true) hiddenZones.add(z);
+    applied[z] = !!f.hide;
+  }
+  store.set('flagApplied', applied); store.set('hiddenZones', [...hiddenZones]); }
+function renderFlagged(){
+  const host = (u) => { try { return new URL(u).hostname.replace('www.',''); } catch(e){ return 'source'; } };
+  let h = Object.entries(FLAG).map(([z, f]) => `<div class="flag"><label class="ck"><input type="checkbox" data-flag="${esc(z)}" ${hiddenZones.has(z)?'checked':''}> Hide ${esc(z)} <span class="hint">${DATA.filter(r=>r.zone===z).length}</span></label>
+    <p>${esc(f.reason)}</p>${(f.sources||[]).map(u => `<a href="${u}" target="_blank" rel="noopener">${host(u)}</a>`).join('')}</div>`).join('');
+  if (META.crime_note) h += `<p class="hint">${esc(META.crime_note.text)} <a href="${META.crime_note.source}" target="_blank" rel="noopener">source</a></p>`;
+  $('#flagged').innerHTML = h || '<p class="hint">None.</p>';
+}
+$('#flagged').addEventListener('change', e => { const z = e.target.dataset.flag; if (!z) return;
+  e.target.checked ? hiddenZones.add(z) : hiddenZones.delete(z); store.set('hiddenZones', [...hiddenZones]); render(); });
+const _render = render;
+render = function(){ _render(); renderFlagged(); };
+// ---------- filters in the URL (shareable links)
+// defaults are left out of the URL so links stay short
+const URL_DEFAULTS = {kind:'', q:'', pmin:'', pmax:'', rooms:'3', amin:'', ppsm:'', unk:true, age:'', seller:'',
+  newonly:false, dealonly:false, droponly:false, exclonly:false, showhidden:false, dedupe:true, sort:'new'};
+const enc = a => a.join('~');          // URLSearchParams does the escaping
+const dec = v => v ? v.split('~') : [];
+function stateParams(){
+  const p = new URLSearchParams();
+  for (const [k, d] of Object.entries(URL_DEFAULTS)){
+    const el = $('#'+k), v = el.type === 'checkbox' ? el.checked : el.value;
+    if (v !== d) p.set(k, typeof v === 'boolean' ? (v ? '1' : '0') : v);
+  }
+  if (mustHave.size) p.set('feat', [...mustHave].join('~'));
+  if (hiddenZones.size) p.set('hide', enc([...hiddenZones]));
+  if (srcOff.size) p.set('src', [...srcOff].join('~'));
+  if (drawn.length) p.set('area', drawn.map(poly => poly.map(([a, b]) => a.toFixed(4) + ',' + b.toFixed(4)).join(';')).join('~'));
+  if (view !== 'grid') p.set('view', view);
+  return p;
+}
+function applyParams(p){
+  if (![...p.keys()].length) return false;
+  for (const [k, d] of Object.entries(URL_DEFAULTS)){
+    const el = $('#'+k), v = p.get(k);
+    if (el.type === 'checkbox') el.checked = v === null ? d : v === '1';
+    else el.value = v === null ? d : v;
+  }
+  mustHave = new Set(dec(p.get('feat')).filter(k => FEAT[k]));
+  hiddenZones = new Set(dec(p.get('hide')));
+  srcOff = new Set(dec(p.get('src')));
+  drawn = dec(p.get('area')).map(poly => poly.split(';').map(pt => pt.split(',').map(Number)));
+  view = p.get('view') || 'grid';
+  // a shared link becomes this browser's current state too
+  const o = {}; for (const f of FIELDS){ const x = $('#'+f); o[f] = x.type === 'checkbox' ? x.checked : x.value; }
+  store.set('filters', o); store.set('mustHave', [...mustHave]); store.set('hiddenZones', [...hiddenZones]);
+  store.set('srcOff', [...srcOff]); store.set('drawnAreas', drawn); store.set('view', view);
+  return true;
+}
+let openId = null;
+function syncUrl(){
+  const p = stateParams();
+  if (openId) p.set('open', openId);
+  const qs = p.toString();
+  history.replaceState(null, '', location.pathname + (qs ? '?' + qs : ''));
+}
+const _render2 = render;
+render = function(){ _render2(); syncUrl(); };
+const _openDlg2 = openDlg2;
+openDlg2 = function(id){ openId = id; _openDlg2(id); syncUrl(); };
+$('#dlg').addEventListener('close', () => { openId = null; syncUrl(); });
+function toast(t){ const el = $('#toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.remove('on'), 1800); }
+async function shareLink(){
+  syncUrl();
+  const url = location.href;
+  try { await navigator.clipboard.writeText(url); toast(openId ? 'Link to this home copied' : 'Link to these filters copied'); }
+  catch(e){ prompt('Copy this link:', url); }
+}
+$('#share').onclick = shareLink;
+
+const startParams = new URLSearchParams(location.search);
+applyParams(startParams);
+renderFeats(); renderSources(); render();
+if (startParams.get('open')) openDlg(startParams.get('open'));
+</script>
+</body>
+</html>
